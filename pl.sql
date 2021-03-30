@@ -104,3 +104,57 @@ BEGIN
    END;
 
 ------------------------------------------------------
+
+DECLARE
+r_telefone telefone_restaurante.restaurante_numero%TYPE,
+r_CNPJ_telefone telefone_restaurante.restaurante_cnpj%TYPE:=1212121212,
+
+CURSOR c_telefone IS
+SELECT restaurante_numero
+FROM telefone_restaurante
+WHERE telefone_restaurante.restaurante_cnpj = r_CNPJ_telefone;
+
+BEGIN
+    OPEN c_telefone;
+    LOOP
+        FETCH c_telefone INTO r_telefone;
+        EXIT WHEN c_telefone%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE(TO_CHAR(r_telefone));
+    END LOOP;
+    CLOSE c_telefone;
+
+EXCEPTION 
+    WHEN INVALID_CURSOR THEN
+        DBMS_OUTPUT.PUT_LINE('Voce tentou manipular incorretamente o cursor.')
+END;
+/
+
+CREATE OR REPLACE TRIGGER NaoPode
+BEFORE DELETE ON pessoa
+FOR EACH ROW
+BEGIN
+    IF :OLD.pessoa_name='Fiuk' THEN
+        RAISE_APPLICATION_ERROR(-20011, 'Voltou do paredao!');
+     END IF;
+END;
+/
+
+DELETE FROM pessoa
+WHERE pessoa_name = 'Fiuk';
+
+------------------------------
+CREATE OR REPLACE TRIGGER quantosProdutos
+AFTER DELETE ON produto 
+DECLARE
+quantProdutos INTEGER;
+BEGIN
+SELECT COUNT(*) INTO quantProdutos
+FROM produto;
+
+    DBMS_OUTPUT.PUT_LINE('Tabela Produto agora tem ' quantProdutos  ' produtos');
+END;
+/
+
+
+DELETE FROM produto
+WHERE produto_nome = 'Frango Xadrez';
